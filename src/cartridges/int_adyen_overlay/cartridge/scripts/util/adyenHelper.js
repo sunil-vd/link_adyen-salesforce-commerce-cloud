@@ -743,7 +743,7 @@ var adyenHelperObj = {
     }
 
     applicationInfo.merchantApplication = {
-      name: 'adyen-salesforce-commerce-cloud',
+      name: 'link_adyen-salesforce-commerce-cloud',
       version: constants.VERSION,
     };
 

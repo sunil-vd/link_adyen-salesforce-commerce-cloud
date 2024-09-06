@@ -31,15 +31,15 @@ jobs:
       - name: Checkout Adyen SFCC code
         uses: actions/checkout@v3
         with:
-          path: adyen-salesforce-commerce-cloud
+          path: link_adyen-salesforce-commerce-cloud
       - name: Install SFRA
         working-directory: storefront-reference-architecture
         run: npm install
       - name: Install Adyen SFCC
-        working-directory: adyen-salesforce-commerce-cloud
+        working-directory: link_adyen-salesforce-commerce-cloud
         run: npm install
       - name: Create dw.json file
-        working-directory: adyen-salesforce-commerce-cloud
+        working-directory: link_adyen-salesforce-commerce-cloud
         run: |
           echo '{
             "username": "${{ secrets.SFCC_USERNAME }}",
@@ -48,10 +48,10 @@ jobs:
             "code-version": "${{ secrets[matrix.code-version-secret] }}"
           }' >> dw.json
       - name: Build the cartridge
-        working-directory: adyen-salesforce-commerce-cloud
+        working-directory: link_adyen-salesforce-commerce-cloud
         run: npm run build > output-sg.txt
       - name: Check build result
-        working-directory: adyen-salesforce-commerce-cloud
+        working-directory: link_adyen-salesforce-commerce-cloud
         run: npm run check-build:sg
   end-to-end-testing:
     if: ${{ github.actor != 'renovate[bot]' || github.actor != 'lgtm-com[bot]' }}
@@ -75,15 +75,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          path: adyen-salesforce-commerce-cloud
+          path: link_adyen-salesforce-commerce-cloud
       - name: install e2e test dependencies
-        working-directory: adyen-salesforce-commerce-cloud/tests/playwright/
+        working-directory: link_adyen-salesforce-commerce-cloud/tests/playwright/
         run: npm i
       - name: setup playwright dependencies
-        working-directory: adyen-salesforce-commerce-cloud/tests/playwright/
+        working-directory: link_adyen-salesforce-commerce-cloud/tests/playwright/
         run: npx playwright install --with-deps
       - name: run e2e tests full coverage
-        working-directory: adyen-salesforce-commerce-cloud/tests/playwright/
+        working-directory: link_adyen-salesforce-commerce-cloud/tests/playwright/
         if: github.event.pull_request.base.ref == 'main' || github.event.pull_request.base.ref == 'develop'
         run: npm run test:ci
         env:
@@ -94,7 +94,7 @@ jobs:
           SFRA_VERSION: ${{ matrix.sfra-version }}
           SFCC_HOSTNAME: ${{ secrets[matrix.sfcc-hostname-secret] }}
       - name: run e2e tests quick coverage
-        working-directory: adyen-salesforce-commerce-cloud/tests/playwright/
+        working-directory: link_adyen-salesforce-commerce-cloud/tests/playwright/
         if: github.event.pull_request.base.ref != 'main' && github.event.pull_request.base.ref != 'develop'
         run: npm run test:ci:quick
         env:

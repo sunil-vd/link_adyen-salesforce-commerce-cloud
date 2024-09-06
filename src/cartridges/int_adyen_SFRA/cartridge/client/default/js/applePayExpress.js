@@ -1,16 +1,16 @@
 const helpers = require('./adyen_checkout/helpers');
-const { checkIfExpressMethodsAreReady } = require('./commons/index');
-const { updateLoadedExpressMethods } = require('./commons');
-
-const APPLE_PAY = 'applepay';
-const isSafari = /^((?!chrome|android|ios).)*safari/i.test(navigator.userAgent);
+const {
+  checkIfExpressMethodsAreReady,
+  createSession,
+  updateLoadedExpressMethods,
+} = require('./commons');
+const { APPLE_PAY } = require('./constants');
 
 let checkout;
 let shippingMethodsData;
 
 async function initializeCheckout() {
-  const session = await fetch(window.sessionsUrl);
-  const sessionData = await session.json();
+  const sessionData = await createSession();
 
   const shippingMethods = await fetch(window.shippingMethodsUrl);
   shippingMethodsData = await shippingMethods.json();
@@ -122,10 +122,9 @@ function callPaymentFromComponent(data, resolveApplePay, rejectApplePay) {
     rejectApplePay();
   });
 }
-
-if (isSafari) {
+$(document).ready(() => {
   initializeCheckout()
-    .then(() => {
+    .then(async () => {
       const applePayPaymentMethod =
         checkout.paymentMethodsResponse.paymentMethods.find(
           (pm) => pm.type === APPLE_PAY,
@@ -165,11 +164,15 @@ if (isSafari) {
             };
 
             const resolveApplePay = () => {
+              // ** is used instead of Math.pow
+              const value =
+                applePayButtonConfig.amount.value *
+                10 ** parseInt(window.digitsNumber, 10);
               const finalPriceUpdate = {
                 newTotal: {
                   type: 'final',
                   label: applePayConfig.merchantName,
-                  amount: `${applePayButtonConfig.amount.value / 100}`,
+                  amount: `${Math.round(value)}`,
                 },
               };
               resolve(finalPriceUpdate);
@@ -276,18 +279,19 @@ if (isSafari) {
       };
 
       const cartContainer = document.getElementsByClassName(APPLE_PAY);
-      for (
-        let expressCheckoutNodesIndex = 0;
-        expressCheckoutNodesIndex < cartContainer.length;
-        expressCheckoutNodesIndex += 1
-      ) {
-        createApplePayButton(applePayButtonConfig).then((applePayButton) => {
-          const isApplePayButtonAvailable = applePayButton.isAvailable();
-          if (isApplePayButtonAvailable) {
-            applePayButton.mount(cartContainer[expressCheckoutNodesIndex]);
-          }
-        });
+      const applePayButton = await createApplePayButton(applePayButtonConfig);
+      const isApplePayButtonAvailable = await applePayButton.isAvailable();
+
+      if (isApplePayButtonAvailable) {
+        for (
+          let expressCheckoutNodesIndex = 0;
+          expressCheckoutNodesIndex < cartContainer.length;
+          expressCheckoutNodesIndex += 1
+        ) {
+          applePayButton.mount(cartContainer[expressCheckoutNodesIndex]);
+        }
       }
+
       updateLoadedExpressMethods(APPLE_PAY);
       checkIfExpressMethodsAreReady();
     })
@@ -295,10 +299,7 @@ if (isSafari) {
       updateLoadedExpressMethods(APPLE_PAY);
       checkIfExpressMethodsAreReady();
     });
-} else {
-  updateLoadedExpressMethods(APPLE_PAY);
-  checkIfExpressMethodsAreReady();
-}
+});
 
 module.exports = {
   handleAuthorised,

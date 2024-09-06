@@ -120,3 +120,4 @@
 
 </iselse>
 </isif>
+<input type="hidden" id="adyen-sessions-token" name="${pdict.csrf.tokenName}" value="${pdict.csrf.token}"/>

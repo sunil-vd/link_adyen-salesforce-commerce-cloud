@@ -17,7 +17,8 @@ module.exports.onBrand = function onBrand(brandObject) {
 module.exports.createSession = async function createSession() {
   return $.ajax({
     url: 'Adyen-Sessions',
-    type: 'get',
+    type: 'post',
+    data: $('#adyen-sessions-token').serialize(),
   });
 };
 
